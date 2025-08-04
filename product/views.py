@@ -20,12 +20,24 @@ def view_product(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-@api_view()
+@api_view(['GET', 'PUT', 'DELETE'])
 def view_specefic_products(request,id):
-    product = get_object_or_404(Product, pk=id)
-    serializer = ProductSerializer(product)
-    return Response(serializer.data)
-    
+    if request.method == 'GET':
+        product = get_object_or_404(Product, pk=id)
+        serializer = ProductSerializer(product, context={'request': request})
+        return Response(serializer.data)
+    if request.method == 'PUT':
+        product = get_object_or_404(Product, pk=id)
+        serializer = ProductSerializer(product, data=request.data, context = {'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+    if request.method == 'DELETE':
+        product = get_object_or_404(Product, pk=id)
+        copy_of_product = product
+        serializer = ProductSerializer(copy_of_product, context = {'request': request})
+        product.delete()
+        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
 @api_view(['GET', 'POST'])
 def view_categories(request):
@@ -40,8 +52,21 @@ def view_categories(request):
         return Response(serializer.data, status.HTTP_201_CREATED)
         
 
-@api_view()
+@api_view(['GET', 'PUT', 'DELETE'])
 def view_specefic_category(request, pk):
-    category = get_object_or_404(Category, pk=pk)
-    serializer = CategorySerializer(category)
-    return Response(serializer.data)
+    if request.method == 'GET':
+        category = get_object_or_404(Category, pk=pk)
+        serializer = CategorySerializer(category)
+        return Response(serializer.data)
+    if request.method == 'PUT':
+        category = get_object_or_404(Category, pk=pk)
+        serializer = CategorySerializer(category, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+    if request.method == 'DELETE':
+        category = get_object_or_404(Category, pk=pk)
+        copy_of_category = category
+        serializer = CategorySerializer(copy_of_category)
+        category.delete()
+        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
