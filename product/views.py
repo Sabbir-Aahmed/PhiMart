@@ -8,11 +8,19 @@ from django.db.models import Count
 
 
 
-@api_view()
+@api_view(['GET', 'POST'])
 def view_product(request):
-    products = Product.objects.select_related('category').all()
-    serializer = ProductSerializer(products, many = True, context={'request': request})
-    return Response(serializer.data)
+    if request.method == 'GET':
+        products = Product.objects.select_related('category').all()
+        serializer = ProductSerializer(products, many = True, context={'request': request})
+        return Response(serializer.data)
+    if request.method=='POST':
+        serializer = ProductSerializer(data=request.data, context={'request': request}) #deserializer
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
 
 @api_view()
 def view_specefic_products(request,id):
