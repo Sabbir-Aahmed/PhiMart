@@ -28,3 +28,12 @@ class ProductSerializer(serializers.ModelSerializer):
     def calculate_tax(self, product):
         from decimal import Decimal
         return round(product.price * Decimal(1.1), 2)
+    
+    def validate_price(self,price):
+        if price < 0:
+            raise serializers.ValidationError('Price could not be negative')
+        return price
+    
+    # def object_validation(self,attrs):
+    #     if attrs['password1'] != attrs['password2']:
+    #         raise serializers.ValidationError("Password didn't pass")
