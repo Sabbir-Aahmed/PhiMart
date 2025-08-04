@@ -9,7 +9,7 @@ class CategorySerializer(serializers.ModelSerializer):
             'id', 'name', 'description', 'product_count'
         ]
     
-    product_count = serializers.IntegerField()
+    product_count = serializers.IntegerField(read_only=True)
 
 class ProductSerializer(serializers.ModelSerializer):
     price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
