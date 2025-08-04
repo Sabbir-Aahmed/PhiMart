@@ -4,6 +4,9 @@ from rest_framework.decorators import api_view
 from product.models import Product,Category
 from rest_framework import status
 from product.serializers import ProductSerializer, CategorySerializer
+from django.db.models import Count
+
+
 
 @api_view()
 def view_product(request):
@@ -20,7 +23,9 @@ def view_specefic_products(request,id):
 
 @api_view()
 def view_categories(request):
-    return Response({"response" : "categories"})
+    categories = Category.objects.annotate(product_count = Count('products')).all()
+    serializer = CategorySerializer(categories, many = True)
+    return Response(serializer.data)
 
 @api_view()
 def view_specefic_category(request, pk):
