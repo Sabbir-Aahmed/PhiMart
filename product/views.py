@@ -8,36 +8,24 @@ from django.db.models import Count
 from rest_framework.views import APIView
 from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.viewsets import ModelViewSet
 
 
-class ProductList(ListCreateAPIView):
-    def get_queryset(self):
-        return Product.objects.select_related('category').all()
-    
-    def get_serializer_class(self):
-        return ProductSerializer
-    
-    def get_serializer_context(self):
-        return {'request': self.request}
-
-class ProductDetails(RetrieveUpdateDestroyAPIView):
-    queryset = Product.objects.all()
+class ProductViewSets(ModelViewSet):
+    queryset = Product.objects.select_related('category').all()
     serializer_class = ProductSerializer
     lookup_field = 'id'
-
-    # def delete(self,request,id):
-    #     product = get_object_or_404(Product, pk=id)
-    #     if product.stock > 10:
-    #         return Response({"message": "Product with stock more than 10 could not be deleted"})
-    #     product.delete()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
-
     
+    def delete(self,request,*args, **kwargs):
+        product = self.get_object()
+        if product.stock > 10:
+            return Response({"message": "Product with stock more than 10 could not be deleted"})
+        self.perform_destroy(product)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class CategoryList(ListCreateAPIView):
+
+
+class CategoryViewSets(ModelViewSet):
     queryset = Category.objects.annotate(product_count = Count('products')).all()
     serializer_class = CategorySerializer
 
-class CategoryDetails(RetrieveUpdateDestroyAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer

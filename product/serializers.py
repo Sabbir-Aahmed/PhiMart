@@ -16,7 +16,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     category = serializers.HyperlinkedRelatedField(
         queryset=Category.objects.all(),
-        view_name='view_specefic_category'
+        view_name='category-detail'
     )
 
     class Meta:
