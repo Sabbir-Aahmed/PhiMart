@@ -5,8 +5,8 @@ from product.models import Product,Category, Review
 from rest_framework import status
 from product.serializers import ProductSerializer, CategorySerializer, ReviewSerializer
 from django.db.models import Count
-
-
+from django_filters.rest_framework import DjangoFilterBackend
+from product.filters import ProductFilter
 from rest_framework.viewsets import ModelViewSet
 
 
@@ -14,7 +14,19 @@ class ProductViewSets(ModelViewSet):
     queryset = Product.objects.select_related('category').all()
     serializer_class = ProductSerializer
     lookup_field = 'id'
+    filter_backends = [DjangoFilterBackend]
+    # filterset_fields = ['category_id','price']
+    filterset_class = ProductFilter
 
+    # def get_queryset(self):
+    #     queryset = Product.objects.select_related('category').all()
+    #     category_id = self.request.query_params.get('category_id')
+
+    #     if category_id is not None:
+    #         queryset = Product.objects.filter(category_id=category_id)
+
+    #     return queryset
+    
     def delete(self,request,*args, **kwargs):
         product = self.get_object()
         if product.stock > 10:
