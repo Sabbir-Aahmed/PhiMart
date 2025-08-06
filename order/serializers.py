@@ -74,4 +74,11 @@ class CartSerialier(serializers.ModelSerializer):
                ]
             )
        return list
+    
+class UpdateCartItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = [
+            'quantity'
+        ]
 
