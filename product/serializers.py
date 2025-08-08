@@ -13,7 +13,17 @@ class CategorySerializer(serializers.ModelSerializer):
     
     product_count = serializers.IntegerField(read_only=True)
 
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = [
+            'id','image'
+        ]
+
+
 class ProductSerializer(serializers.ModelSerializer):
+    images = ProductImageSerializer(many = True, read_only = True)
     price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
 
     category = serializers.HyperlinkedRelatedField(
@@ -24,7 +34,7 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            'id', 'name', 'description', 'price', 'stock', 'category', 'price_with_tax'
+            'id', 'name', 'description', 'price', 'stock', 'category', 'price_with_tax', 'images'
         ]
 
     def calculate_tax(self, product):
@@ -36,12 +46,7 @@ class ProductSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Price could not be negative')
         return price
     
-class ProductImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductImage
-        fields = [
-            'id','image'
-        ]
+
 
 class SimpleUserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField(method_name='get_current_user_name')
