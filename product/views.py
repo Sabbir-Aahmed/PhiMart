@@ -1,9 +1,9 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from product.models import Product,Category, Review
+from product.models import Product,Category, Review, ProductImage
 from rest_framework import status
-from product.serializers import ProductSerializer, CategorySerializer, ReviewSerializer
+from product.serializers import ProductSerializer, CategorySerializer, ReviewSerializer, ProductImageSerializer
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from product.filters import ProductFilter
@@ -11,7 +11,6 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
 from product.pagination import DefaultPagination
 from api.permissions import IsAdminOrReadOnly, FullDJandoModelPermission
-from rest_framework.permissions import DjangoModelPermissions,DjangoModelPermissionsOrAnonReadOnly
 from product.permissions import IsReviewAuthorOrReadonly
 
 
@@ -25,24 +24,15 @@ class ProductViewSets(ModelViewSet):
     pagination_class = DefaultPagination
     search_fields = ['name', 'description']
     ordering_fields = ['price', 'updated_at']
-    # permission_classes = [IsAdminUser]
-    # permission_classes = [IsAdminOrReadOnly]
     permission_classes = [FullDJandoModelPermission]
-    # permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
 
-    # def get_permissions(self):
-    #     if self.request.method == 'GET':
-    #         return [AllowAny()]
-    #     return [IsAdminUser()]
-    
-    def delete(self,request,*args, **kwargs):
-        product = self.get_object()
-        if product.stock > 10:
-            return Response({"message": "Product with stock more than 10 could not be deleted"})
-        self.perform_destroy(product)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+class ProductImageViewSet(ModelViewSet):
+    serializer_class = ProductImageSerializer
+    def get_queryset(self):
+        return ProductImage.objects.filter(product_id = self.kwargs['product_id'])
 
-
+    def perform_create(self, serializer):
+        serializer.save(product_id = self.kwargs['product_id'])
 
 class CategoryViewSets(ModelViewSet):   
     permission_classes = [IsAdminOrReadOnly]
