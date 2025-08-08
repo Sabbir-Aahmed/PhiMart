@@ -24,10 +24,12 @@ class ProductViewSets(ModelViewSet):
     pagination_class = DefaultPagination
     search_fields = ['name', 'description']
     ordering_fields = ['price', 'updated_at']
-    permission_classes = [FullDJandoModelPermission]
+    permission_classes = [IsAdminOrReadOnly]
 
 class ProductImageViewSet(ModelViewSet):
     serializer_class = ProductImageSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
     def get_queryset(self):
         return ProductImage.objects.filter(product_id = self.kwargs['product_id'])
 
