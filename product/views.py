@@ -10,6 +10,8 @@ from product.filters import ProductFilter
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
 from product.pagination import DefaultPagination
+from api.permissions import IsAdminOrReadOnly, FullDJandoModelPermission
+from rest_framework.permissions import DjangoModelPermissions,DjangoModelPermissionsOrAnonReadOnly
 
 
 class ProductViewSets(ModelViewSet):
@@ -21,6 +23,15 @@ class ProductViewSets(ModelViewSet):
     pagination_class = DefaultPagination
     search_fields = ['name', 'description']
     ordering_fields = ['price', 'updated_at']
+    # permission_classes = [IsAdminUser]
+    # permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [FullDJandoModelPermission]
+    # permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+
+    # def get_permissions(self):
+    #     if self.request.method == 'GET':
+    #         return [AllowAny()]
+    #     return [IsAdminUser()]
     
     def delete(self,request,*args, **kwargs):
         product = self.get_object()
@@ -31,9 +42,11 @@ class ProductViewSets(ModelViewSet):
 
 
 
-class CategoryViewSets(ModelViewSet):
+class CategoryViewSets(ModelViewSet):   
+    permission_classes = [IsAdminOrReadOnly]
     queryset = Category.objects.annotate(product_count = Count('products')).all()
     serializer_class = CategorySerializer
+    
 
 
 class ReviewViewSet(ModelViewSet):
