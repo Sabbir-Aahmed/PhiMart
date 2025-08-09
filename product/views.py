@@ -16,8 +16,13 @@ from drf_yasg.utils import swagger_auto_schema
 
 
 class ProductViewSets(ModelViewSet):
-    
-    queryset = Product.objects.select_related('category').all()
+    """
+    API endpoint for managing products in the e-commerce store
+     - Allows authenticated admin to create, update, and delete products
+     - Allows users to browse and filter product
+     - Support searching by name, description, and category
+     - Support ordering by price and updated_at
+    """
     serializer_class = ProductSerializer
     lookup_field = 'id'
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -26,7 +31,10 @@ class ProductViewSets(ModelViewSet):
     search_fields = ['name', 'description']
     ordering_fields = ['price', 'updated_at']
     permission_classes = [IsAdminOrReadOnly]
-
+    
+    def get_queryset(self):
+        return Product.objects.prefetch_related('images').all()
+    
     @swagger_auto_schema(
         operation_summary='Retrive a list of products'
     )
