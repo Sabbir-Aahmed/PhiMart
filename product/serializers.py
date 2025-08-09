@@ -11,7 +11,9 @@ class CategorySerializer(serializers.ModelSerializer):
             'id', 'name', 'description', 'product_count'
         ]
     
-    product_count = serializers.IntegerField(read_only=True)
+    product_count = serializers.IntegerField(
+        read_only=True, help_text="Number of products in this category."
+        )
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -20,15 +22,29 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = [
             'id','image'
         ]
+        extra_kwargs = {
+            'image': {
+                'help_text': 'Upload the image for this product.'
+            }
+        }
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    images = ProductImageSerializer(many = True, read_only = True)
-    price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
+    images = ProductImageSerializer(
+        many = True, 
+        read_only = True,
+        help_text="List of images associated with the product."
+        )
+    
+    price_with_tax = serializers.SerializerMethodField(
+        method_name='calculate_tax',
+        help_text="Product price including 10% tax."
+        )
 
     category = serializers.HyperlinkedRelatedField(
         queryset=Category.objects.all(),
-        view_name='category-detail'
+        view_name='category-detail',
+        help_text="URL reference to the category this product belongs to."
     )
 
     class Meta:
@@ -36,6 +52,10 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'description', 'price', 'stock', 'category', 'price_with_tax', 'images'
         ]
+
+        extra_kwargs = {
+            'stock': {'help_text': 'Number of units available in stock.'}
+        }
 
     def calculate_tax(self, product):
         from decimal import Decimal
@@ -49,7 +69,11 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):
-    full_name = serializers.SerializerMethodField(method_name='get_current_user_name')
+    full_name = serializers.SerializerMethodField(
+        method_name='get_current_user_name',
+        help_text="Full name of the user."
+        )
+    
     class Meta:
         model = get_user_model()
         fields = [
@@ -61,12 +85,21 @@ class SimpleUserSerializer(serializers.ModelSerializer):
     
 class ReviewSerializer(serializers.ModelSerializer):
     # user = SimpleUserSerializer()
-    user = serializers.SerializerMethodField(method_name='get_user')
+    user = serializers.SerializerMethodField(
+        method_name='get_user',
+         help_text="User who wrote the review."
+        )
 
     class Meta:
         model = Review
         fields = ['id', 'user', 'product', 'ratings', 'comment']
         read_only_fields = ['user', 'product']
+
+        extra_kwargs = {
+            'product': {'read_only': True, 'help_text': 'The product being reviewed.'},
+            'ratings': {'help_text': 'Rating given to the product (e.g., 1-5).'},
+            'comment': {'help_text': 'Text comment about the product.'}
+        }
 
     def get_user(self, obj):
         return SimpleUserSerializer(obj.user).data

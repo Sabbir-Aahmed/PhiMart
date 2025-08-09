@@ -24,6 +24,11 @@ class AddCartItemSerializer(serializers.ModelSerializer):
             'id', 'product_id', 'quantity'
         ]
 
+        extra_kwargs = {
+            
+            'quantity': {'help_text': "Quantity of products."},
+        }
+
     def save(self,**kwargs):
         cart_id = self.context['cart_id']
         product_id = self.validated_data['product_id']
@@ -48,8 +53,6 @@ class AddCartItemSerializer(serializers.ModelSerializer):
 class CartItemSerializer(serializers.ModelSerializer):
     product = SimpleProductSerializer()
 
-    # product__price = serializers.SerializerMethodField(method_name= 'get_product_price')
-
     totla_price = serializers.SerializerMethodField(method_name='get_total_price')
     class Meta:
         model = CartItem
@@ -60,9 +63,7 @@ class CartItemSerializer(serializers.ModelSerializer):
     def get_total_price(self,cart_item: CartItem):
         return cart_item.quantity * cart_item.product.price
 
-    # def get_product_price(self,cart_item):
-    #     return cart_item.product.price
-    
+
 class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(many = True, read_only = True)
     total_price = serializers.SerializerMethodField(method_name='get_total_price')
@@ -72,7 +73,12 @@ class CartSerializer(serializers.ModelSerializer):
             'id', 'user', 'items','total_price'
         ]
         read_only_fields = ['user']
-    
+
+        extra_kwargs = {
+            'items': {'help_text': "List of items in the cart."},
+            'total_price': {'help_text': "Total price of all items in the cart."},
+        }
+
     def get_total_price(self,cart: Cart):
        list = sum(
            [
@@ -89,7 +95,7 @@ class UpdateCartItemSerializer(serializers.ModelSerializer):
         ]
 
 class CreateOrderSerializer(serializers.Serializer):
-    cart_id = serializers.UUIDField()
+    cart_id = serializers.UUIDField(help_text="UUID of the cart from which to create the order.")
 
     def validate_cart_id(self,cart_id):
         if not Cart.objects.filter(pk=cart_id).exists():
@@ -129,19 +135,6 @@ class UpdateOrderSerializer(serializers.ModelSerializer):
             'status'
         ]
 
-    # def update(self, instance, validated_data):
-    #     user = self.context['user']
-    #     new_status = validated_data['status']
-
-    #     if new_status == Order.CANCELED:
-    #         return OrderService.cancel_order(order=instance, user=user)
-
-    #     if not user.is_staff :
-    #         raise serializers.ValidationError(
-    #             {'detail': 'You are not allowd to update this order'}
-    #         )
-        
-    #     return super().update(instance, validated_data)
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemsSerializer(many=True)
