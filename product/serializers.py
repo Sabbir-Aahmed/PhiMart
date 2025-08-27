@@ -43,11 +43,6 @@ class ProductSerializer(serializers.ModelSerializer):
         help_text="Product price including 10% tax."
         )
 
-    category = serializers.HyperlinkedRelatedField(
-        queryset=Category.objects.all(),
-        view_name='category-detail',
-        help_text="URL reference to the category this product belongs to."
-    )
 
     class Meta:
         model = Product
