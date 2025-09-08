@@ -38,7 +38,8 @@ class AddCartItemSerializer(serializers.ModelSerializer):
                 cart_id=cart_id, product_id=product_id
                 )
             cart_item.quantity += quantity
-            self.instance = cart_item.save()
+            cart_item.save()
+            self.instance = cart_item
 
         except CartItem.DoesNotExist:
             self.instance = CartItem.objects.create(cart_id=cart_id, **self.validated_data)
