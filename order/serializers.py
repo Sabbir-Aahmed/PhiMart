@@ -53,7 +53,7 @@ class AddCartItemSerializer(serializers.ModelSerializer):
 class CartItemSerializer(serializers.ModelSerializer):
     product = SimpleProductSerializer()
 
-    totla_price = serializers.SerializerMethodField(method_name='get_total_price')
+    total_price = serializers.SerializerMethodField(method_name='get_total_price')
     class Meta:
         model = CartItem
         fields = [
