@@ -186,8 +186,9 @@ def initiate_payment(request):
     post_body['product_profile'] = "general"
 
 
+    print("Payment request body:", post_body)
     response = sslcz.createSession(post_body) # API response
-    print(response)
+    print("SSLCommerz response:",response)
     if response.get("status") == 'SUCCESS':
         return Response({"payment_url": response['GatewayPageURL']})
     return Response({"error": "Payment initatiation failed"}, status=status.HTTP_400_BAD_REQUEST)
